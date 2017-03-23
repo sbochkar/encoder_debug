@@ -3,12 +3,13 @@
 
 #include <endat.h>
 
+#include <util/delay.h>
 
 void config_endat() {
 
 	/* Configure Timer for clock generation */
 	// Configure the clock source to be system clock.
-	TCCR0B |= _BV(CS00);
+	//TCCR0B |= _BV(CS00);
 
 	// Set CTC mode & Toggle OCRA pin when compare event happens.
 	TCCR0A = _BV(WGM01) | _BV(COM0A0);
@@ -27,16 +28,13 @@ void config_endat() {
 
 int recieve_position(void) {
 
-	uint8_t clk_level = 0;
-	uint8_t state = 0;
+//	uint8_t clk_level = 0;
+//	uint8_t state = 0;
 
+	// Configure the clock source to be system clock.
+	TCCR0B |= _BV(CS00);
+	_delay_ms(1);
 
-
-	uint8_t i;
-	uint8_t test = 0;
-	for(i=0; i<25; i++){
-		test++;
-	}
 //	int i;
 //	for(i=CMD_LEN-1; i>=0; i--) {
 //
@@ -66,7 +64,13 @@ int recieve_position(void) {
 //			TIFR0 |= _BV(OCF0A);
 //		}
 //	}
-	// Configure the clock source to be system clock.
+	// Stop the timer counter
 	TCCR0B &= ~_BV(CS00);
+	// Reset the counter
+	TCNT0 = 0x00;
 
+	// Reset Clock pin to high as initial condition.
+	if (!bit_is_set(PIND, PIND6)) {
+		TCCR0B |= _BV(FOC0A);
+	}
 }
