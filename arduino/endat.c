@@ -22,48 +22,40 @@ void config_endat() {
 
 	// Configure PORTB5 as DATA pin
 	DDRB |= _BV(DDB5);
-	PORTB = 0xFF;
 
 }
 
 int recieve_position(void) {
 
-//	uint8_t clk_level = 0;
-//	uint8_t state = 0;
+	uint8_t clk_level = 1;
+	uint8_t i;
 
 	// Configure the clock source to be system clock.
 	TCCR0B |= _BV(CS00);
-	_delay_ms(1);
 
-//	int i;
-//	for(i=CMD_LEN-1; i>=0; i--) {
-//
-//		// Clock event is when TIFR0 is set
-//		if (bit_is_set(TIFR0, OCF0A)) {
-//
-//			// State machine transitions are on the rising ede.
-//			if (clk_level) {
-//
-//				if (state == 2) {
-//					PORTB |= _BV(PORTB5);
-//
-//				} else if (state == 8){
-//					
-//					PORTB &= ~_BV(PORTB5);
-//					state = 0;
-//				}
-//
-//
-//
-//				clk_level = 0;
-//				state++;
-//			} else {
-//				clk_level = 1;
-//			}
-//			
-//			TIFR0 |= _BV(OCF0A);
-//		}
-//	}
+	for(i=0; i<2*NUM_STATES; i++) {
+
+		// Clock event is when TIFR0 is set
+		// State machine transitions are on from high to low level.
+		while(!bit_is_set(TIFR0, OCF0A));
+
+		if (clk_level) {
+
+			if (i == 2*2) {
+				PORTB |= _BV(PORTB5);
+
+			} else if (i >= 2*8){
+				
+				PORTB &= ~_BV(PORTB5);
+			}
+
+			clk_level = 0;
+		} else {
+			clk_level = 1;
+		}
+		
+		TIFR0 |= _BV(OCF0A);
+	}
 	// Stop the timer counter
 	TCCR0B &= ~_BV(CS00);
 	// Reset the counter
