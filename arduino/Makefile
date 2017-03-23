@@ -8,20 +8,20 @@ DL = avrdude
 MMCU = atmega328p
 
 CFLAGS = -I$(IDIR)
-CFLAGS += -Os -DF_CPU=20000000UL -mmcu=$(MMCU)
+CFLAGS += -Os -DF_CPU=16000000UL -mmcu=$(MMCU) -Wa,-aslh
 
 ODIR = obj
 
 #_DEPS = pid.h
-_DEPS = 
+_DEPS = endat.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 #_OBJ = main.o pid.o
-_OBJ = main.o
+_OBJ = main.o endat.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS) >list.txt
 
 main: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) 
